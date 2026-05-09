@@ -1,8 +1,69 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Inicio";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="text-center mb-5">
+    <h1 class="display-5 fw-bold">Sistema de Expedientes Académicos</h1>
+    <p class="lead">Colegio San José</p>
+    <p class="text-muted">
+        Plataforma web para gestionar alumnos, materias, expedientes, promedios y estadísticas académicas.
+    </p>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm text-center">
+            <div class="card-body">
+                <h5 class="card-title">Alumnos</h5>
+                <h2 class="fw-bold">@ViewBag.TotalAlumnos</h2>
+                <p class="text-muted">Registrados</p>
+                <a asp-controller="Alumno" asp-action="Index" class="btn btn-primary btn-sm">Gestionar</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm text-center">
+            <div class="card-body">
+                <h5 class="card-title">Materias</h5>
+                <h2 class="fw-bold">@ViewBag.TotalMaterias</h2>
+                <p class="text-muted">Registradas</p>
+                <a asp-controller="Materia" asp-action="Index" class="btn btn-primary btn-sm">Gestionar</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm text-center">
+            <div class="card-body">
+                <h5 class="card-title">Expedientes</h5>
+                <h2 class="fw-bold">@ViewBag.TotalExpedientes</h2>
+                <p class="text-muted">Registrados</p>
+                <a asp-controller="Expediente" asp-action="Index" class="btn btn-primary btn-sm">Ver expedientes</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm text-center">
+            <div class="card-body">
+                <h5 class="card-title">Promedio general</h5>
+                <h2 class="fw-bold">@ViewBag.PromedioGeneral.ToString("0.00")</h2>
+                <p class="text-muted">Nota promedio</p>
+                <a asp-controller="Reportes" asp-action="Promedios" class="btn btn-primary btn-sm">Ver promedios</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h4>Opciones principales</h4>
+        <p>Desde este panel puedes acceder rápidamente a las funciones principales del sistema.</p>
+
+        <a asp-controller="Alumno" asp-action="Create" class="btn btn-success me-2 mb-2">Agregar alumno</a>
+        <a asp-controller="Materia" asp-action="Create" class="btn btn-success me-2 mb-2">Agregar materia</a>
+        <a asp-controller="Expediente" asp-action="Create" class="btn btn-success me-2 mb-2">Agregar expediente</a>
+        <a asp-controller="Reportes" asp-action="Graficas" class="btn btn-info mb-2">Ver gráficas</a>
+    </div>
 </div>
