@@ -1,0 +1,71 @@
+﻿@model IEnumerable<ColegioSanJose.Models.Carrera>
+
+@{
+    ViewData["Title"] = "Listado de carreras";
+    var filtro = ViewData["FiltroActual"] as string;
+}
+
+<h1>Listado de carreras</h1>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form asp-action="Index" method="get">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-8">
+                    <label class="form-label">Buscar carrera</label>
+                    <input type="text"
+                           name="buscar"
+                           value="@filtro"
+                           class="form-control"
+                           placeholder="Ejemplo: Medicina, Software, Administración..." />
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Buscar</button>
+                </div>
+
+                <div class="col-md-2">
+                    <a asp-action="Index" class="btn btn-secondary w-100">Limpiar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="mb-3">
+    <a asp-action="Create" class="btn btn-primary">Agregar carrera</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-warning">
+        No se encontraron carreras registradas.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table-dark-custom">
+            <thead>
+                <tr>
+                    <th>Carrera</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.NombreCarrera</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.CarreraId" class="btn btn-warning btn-sm">Editar</a>
+                            <a asp-action="Details" asp-route-id="@item.CarreraId" class="btn btn-info btn-sm">Detalles</a>
+                            <a asp-action="Delete" asp-route-id="@item.CarreraId" class="btn btn-danger btn-sm">Eliminar</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

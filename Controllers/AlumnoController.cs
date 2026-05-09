@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using ColegioSanJose.Data;
+using ColegioSanJose.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using ColegioSanJose.Data;
-using ColegioSanJose.Models;
 
 namespace ColegioSanJose.Controllers
 {
@@ -20,9 +16,43 @@ namespace ColegioSanJose.Controllers
         }
 
         // GET: Alumno
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string buscar, string grado, string orden = "az")
         {
-            return View(await _context.Alumnos.ToListAsync());
+            ViewData["FiltroActual"] = buscar;
+            ViewData["GradoActual"] = grado;
+            ViewData["OrdenActual"] = orden;
+
+            ViewBag.Grados = await _context.Alumnos
+                .Select(a => a.Grado)
+                .Distinct()
+                .OrderBy(g => g)
+                .ToListAsync();
+
+            var alumnos = _context.Alumnos.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(buscar))
+            {
+                buscar = buscar.Trim();
+
+                alumnos = alumnos.Where(a =>
+                    a.Nombre.Contains(buscar) ||
+                    a.Apellido.Contains(buscar)
+                );
+            }
+
+            if (!string.IsNullOrWhiteSpace(grado))
+            {
+                alumnos = alumnos.Where(a => a.Grado == grado);
+            }
+
+            alumnos = orden switch
+            {
+                "za" => alumnos.OrderByDescending(a => a.Nombre).ThenByDescending(a => a.Apellido),
+                "grado" => alumnos.OrderBy(a => a.Grado).ThenBy(a => a.Nombre).ThenBy(a => a.Apellido),
+                _ => alumnos.OrderBy(a => a.Nombre).ThenBy(a => a.Apellido)
+            };
+
+            return View(await alumnos.ToListAsync());
         }
 
         // GET: Alumno/Details/5
@@ -35,6 +65,7 @@ namespace ColegioSanJose.Controllers
 
             var alumno = await _context.Alumnos
                 .FirstOrDefaultAsync(m => m.AlumnoId == id);
+
             if (alumno == null)
             {
                 return NotFound();
@@ -44,14 +75,13 @@ namespace ColegioSanJose.Controllers
         }
 
         // GET: Alumno/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            await CargarCarreras();
             return View();
         }
 
         // POST: Alumno/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("AlumnoId,Nombre,Apellido,FechaNacimiento,Grado")] Alumno alumno)
@@ -62,6 +92,8 @@ namespace ColegioSanJose.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            await CargarCarreras(alumno.Grado);
             return View(alumno);
         }
 
@@ -74,16 +106,17 @@ namespace ColegioSanJose.Controllers
             }
 
             var alumno = await _context.Alumnos.FindAsync(id);
+
             if (alumno == null)
             {
                 return NotFound();
             }
+
+            await CargarCarreras(alumno.Grado);
             return View(alumno);
         }
 
         // POST: Alumno/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("AlumnoId,Nombre,Apellido,FechaNacimiento,Grado")] Alumno alumno)
@@ -106,13 +139,14 @@ namespace ColegioSanJose.Controllers
                     {
                         return NotFound();
                     }
-                    else
-                    {
-                        throw;
-                    }
+
+                    throw;
                 }
+
                 return RedirectToAction(nameof(Index));
             }
+
+            await CargarCarreras(alumno.Grado);
             return View(alumno);
         }
 
@@ -126,6 +160,7 @@ namespace ColegioSanJose.Controllers
 
             var alumno = await _context.Alumnos
                 .FirstOrDefaultAsync(m => m.AlumnoId == id);
+
             if (alumno == null)
             {
                 return NotFound();
@@ -140,6 +175,7 @@ namespace ColegioSanJose.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var alumno = await _context.Alumnos.FindAsync(id);
+
             if (alumno != null)
             {
                 _context.Alumnos.Remove(alumno);
@@ -152,6 +188,22 @@ namespace ColegioSanJose.Controllers
         private bool AlumnoExists(int id)
         {
             return _context.Alumnos.Any(e => e.AlumnoId == id);
+        }
+
+        private async Task CargarCarreras(string? carreraSeleccionada = null)
+        {
+            var carreras = await _context.Carreras
+                .Select(c => c.NombreCarrera)
+                .Distinct()
+                .OrderBy(c => c)
+                .ToListAsync();
+
+            if (!string.IsNullOrWhiteSpace(carreraSeleccionada) && !carreras.Contains(carreraSeleccionada))
+            {
+                carreras.Insert(0, carreraSeleccionada);
+            }
+
+            ViewBag.Carreras = new SelectList(carreras, carreraSeleccionada);
         }
     }
 }

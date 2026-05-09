@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using ColegioSanJose.Data;
+using ColegioSanJose.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using ColegioSanJose.Data;
-using ColegioSanJose.Models;
 
 namespace ColegioSanJose.Controllers
 {
@@ -20,9 +16,68 @@ namespace ColegioSanJose.Controllers
         }
 
         // GET: Materia
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string buscar, string grado, string docente, string orden = "materia_az")
         {
-            return View(await _context.Materias.ToListAsync());
+            ViewData["FiltroActual"] = buscar;
+            ViewData["GradoActual"] = grado;
+            ViewData["DocenteActual"] = docente;
+            ViewData["OrdenActual"] = orden;
+
+            var carrerasCatalogo = await _context.Carreras
+                .Select(c => c.NombreCarrera)
+                .ToListAsync();
+
+            var gradosMaterias = await _context.Materias
+                .Select(m => m.Grado)
+                .ToListAsync();
+
+            ViewBag.Grados = carrerasCatalogo
+                .Union(gradosMaterias)
+                .Where(g => !string.IsNullOrWhiteSpace(g))
+                .Distinct()
+                .OrderBy(g => g)
+                .ToList();
+
+            ViewBag.Docentes = await _context.Materias
+                .Select(m => m.Docente)
+                .Where(d => !string.IsNullOrWhiteSpace(d))
+                .Distinct()
+                .OrderBy(d => d)
+                .ToListAsync();
+
+            var materias = _context.Materias.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(buscar))
+            {
+                buscar = buscar.Trim();
+
+                materias = materias.Where(m =>
+                    m.NombreMateria.Contains(buscar) ||
+                    m.Docente.Contains(buscar) ||
+                    m.Grado.Contains(buscar)
+                );
+            }
+
+            if (!string.IsNullOrWhiteSpace(grado))
+            {
+                materias = materias.Where(m => m.Grado == grado);
+            }
+
+            if (!string.IsNullOrWhiteSpace(docente))
+            {
+                materias = materias.Where(m => m.Docente == docente);
+            }
+
+            materias = orden switch
+            {
+                "materia_za" => materias.OrderByDescending(m => m.NombreMateria),
+                "grado" => materias.OrderBy(m => m.Grado).ThenBy(m => m.NombreMateria),
+                "docente_az" => materias.OrderBy(m => m.Docente).ThenBy(m => m.NombreMateria),
+                "docente_za" => materias.OrderByDescending(m => m.Docente).ThenBy(m => m.NombreMateria),
+                _ => materias.OrderBy(m => m.NombreMateria)
+            };
+
+            return View(await materias.ToListAsync());
         }
 
         // GET: Materia/Details/5
@@ -35,6 +90,7 @@ namespace ColegioSanJose.Controllers
 
             var materia = await _context.Materias
                 .FirstOrDefaultAsync(m => m.MateriaId == id);
+
             if (materia == null)
             {
                 return NotFound();
@@ -44,17 +100,16 @@ namespace ColegioSanJose.Controllers
         }
 
         // GET: Materia/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            await CargarCarreras();
             return View();
         }
 
         // POST: Materia/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("MateriaId,NombreMateria,Docente")] Materia materia)
+        public async Task<IActionResult> Create([Bind("MateriaId,NombreMateria,Docente,Grado")] Materia materia)
         {
             if (ModelState.IsValid)
             {
@@ -62,6 +117,8 @@ namespace ColegioSanJose.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            await CargarCarreras(materia.Grado);
             return View(materia);
         }
 
@@ -74,19 +131,20 @@ namespace ColegioSanJose.Controllers
             }
 
             var materia = await _context.Materias.FindAsync(id);
+
             if (materia == null)
             {
                 return NotFound();
             }
+
+            await CargarCarreras(materia.Grado);
             return View(materia);
         }
 
         // POST: Materia/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("MateriaId,NombreMateria,Docente")] Materia materia)
+        public async Task<IActionResult> Edit(int id, [Bind("MateriaId,NombreMateria,Docente,Grado")] Materia materia)
         {
             if (id != materia.MateriaId)
             {
@@ -106,13 +164,14 @@ namespace ColegioSanJose.Controllers
                     {
                         return NotFound();
                     }
-                    else
-                    {
-                        throw;
-                    }
+
+                    throw;
                 }
+
                 return RedirectToAction(nameof(Index));
             }
+
+            await CargarCarreras(materia.Grado);
             return View(materia);
         }
 
@@ -126,6 +185,7 @@ namespace ColegioSanJose.Controllers
 
             var materia = await _context.Materias
                 .FirstOrDefaultAsync(m => m.MateriaId == id);
+
             if (materia == null)
             {
                 return NotFound();
@@ -140,6 +200,7 @@ namespace ColegioSanJose.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var materia = await _context.Materias.FindAsync(id);
+
             if (materia != null)
             {
                 _context.Materias.Remove(materia);
@@ -152,6 +213,22 @@ namespace ColegioSanJose.Controllers
         private bool MateriaExists(int id)
         {
             return _context.Materias.Any(e => e.MateriaId == id);
+        }
+
+        private async Task CargarCarreras(string? carreraSeleccionada = null)
+        {
+            var carreras = await _context.Carreras
+                .Select(c => c.NombreCarrera)
+                .Distinct()
+                .OrderBy(c => c)
+                .ToListAsync();
+
+            if (!string.IsNullOrWhiteSpace(carreraSeleccionada) && !carreras.Contains(carreraSeleccionada))
+            {
+                carreras.Insert(0, carreraSeleccionada);
+            }
+
+            ViewBag.Carreras = new SelectList(carreras, carreraSeleccionada);
         }
     }
 }

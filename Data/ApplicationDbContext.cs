@@ -13,6 +13,7 @@ namespace ColegioSanJose.Data
         public DbSet<Alumno> Alumnos { get; set; }
         public DbSet<Materia> Materias { get; set; }
         public DbSet<Expediente> Expedientes { get; set; }
+        public DbSet<Carrera> Carreras { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

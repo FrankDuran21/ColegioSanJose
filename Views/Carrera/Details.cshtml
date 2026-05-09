@@ -1,0 +1,19 @@
+﻿@model ColegioSanJose.Models.Carrera
+
+@{
+    ViewData["Title"] = "Detalles de carrera";
+}
+
+<h1>Detalles de carrera</h1>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Carrera</dt>
+            <dd class="col-sm-9">@Model.NombreCarrera</dd>
+        </dl>
+
+        <a asp-action="Edit" asp-route-id="@Model.CarreraId" class="btn btn-warning">Editar</a>
+        <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
+    </div>
+</div>

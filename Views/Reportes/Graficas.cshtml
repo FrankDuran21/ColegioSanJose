@@ -1,45 +1,346 @@
 ﻿@{
     ViewData["Title"] = "Gráficas estadísticas";
-    var alumnos = System.Text.Json.JsonSerializer.Serialize(ViewBag.Alumnos);
-    var promedios = System.Text.Json.JsonSerializer.Serialize(ViewBag.Promedios);
+
+    var gradoActual = ViewData["GradoActual"] as string;
+    var grados = ViewBag.Grados as List<string>;
+
+    var carrerasLabels = System.Text.Json.JsonSerializer.Serialize(ViewBag.CarrerasLabels);
+    var carrerasPromedios = System.Text.Json.JsonSerializer.Serialize(ViewBag.CarrerasPromedios);
+
+    var materiasLabels = System.Text.Json.JsonSerializer.Serialize(ViewBag.MateriasLabels);
+    var materiasPromedios = System.Text.Json.JsonSerializer.Serialize(ViewBag.MateriasPromedios);
+
+    var estadoLabels = System.Text.Json.JsonSerializer.Serialize(ViewBag.EstadoLabels);
+    var estadoCantidad = System.Text.Json.JsonSerializer.Serialize(ViewBag.EstadoCantidad);
+
+    var cantidadCarreraLabels = System.Text.Json.JsonSerializer.Serialize(ViewBag.CantidadCarreraLabels);
+    var cantidadCarreraDatos = System.Text.Json.JsonSerializer.Serialize(ViewBag.CantidadCarreraDatos);
 }
 
 <h1>Gráficas estadísticas</h1>
 
-<p>
-    La siguiente gráfica representa el promedio de notas por alumno registrado en el sistema.
+<p class="text-muted">
+    Esta sección muestra estadísticas académicas por carrera, materia y estado de aprobación.
 </p>
 
-<div class="card shadow-sm p-4">
-    <canvas id="graficaPromedios"></canvas>
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form asp-action="Graficas" method="get">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-8">
+                    <label class="form-label">Filtrar por carrera o grado</label>
+                    <select name="grado" class="form-control">
+                        <option value="">Todas las carreras</option>
+
+                        @if (grados != null)
+                        {
+                            foreach (var grado in grados)
+                            {
+                                if (grado == gradoActual)
+                                {
+                                    <option value="@grado" selected>@grado</option>
+                                }
+                                else
+                                {
+                                    <option value="@grado">@grado</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+                </div>
+
+                <div class="col-md-2">
+                    <a asp-action="Graficas" class="btn btn-secondary w-100">Limpiar</a>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm text-center">
+            <div class="card-body">
+                <h5>Alumnos</h5>
+                <h2 class="fw-bold stat-number">@ViewBag.TotalAlumnos</h2>
+                <p class="text-muted">Registrados</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm text-center">
+            <div class="card-body">
+                <h5>Materias</h5>
+                <h2 class="fw-bold stat-number">@ViewBag.TotalMaterias</h2>
+                <p class="text-muted">Registradas</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm text-center">
+            <div class="card-body">
+                <h5>Expedientes</h5>
+                <h2 class="fw-bold stat-number">@ViewBag.TotalExpedientes</h2>
+                <p class="text-muted">Registrados</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm text-center">
+            <div class="card-body">
+                <h5>Promedio general</h5>
+                <h2 class="fw-bold stat-number">@ViewBag.PromedioGeneral.ToString("0.00")</h2>
+                <p class="text-muted">Nota promedio</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ViewBag.TotalExpedientes == 0)
+{
+    <div class="alert alert-warning">
+        No hay expedientes registrados para generar gráficas con el filtro seleccionado.
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm chart-card">
+                <div class="card-body">
+                    <h4>Promedio por carrera</h4>
+                    <p class="text-muted">Comparación del promedio general por carrera o grado.</p>
+                    <canvas id="graficaCarreras"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm chart-card">
+                <div class="card-body">
+                    <h4>Aprobados vs reprobados</h4>
+                    <p class="text-muted">Distribución de estudiantes según nota final.</p>
+                    <canvas id="graficaEstados"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm chart-card">
+                <div class="card-body">
+                    <h4>Promedio por materia</h4>
+                    <p class="text-muted">Promedio obtenido en cada materia registrada.</p>
+                    <canvas id="graficaMaterias"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm chart-card">
+                <div class="card-body">
+                    <h4>Expedientes por carrera</h4>
+                    <p class="text-muted">Cantidad de registros académicos por carrera o grado.</p>
+                    <canvas id="graficaCantidadCarrera"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    const alumnos = @Html.Raw(alumnos);
-    const promedios = @Html.Raw(promedios);
+    const carrerasLabels = @Html.Raw(carrerasLabels);
+    const carrerasPromedios = @Html.Raw(carrerasPromedios);
 
-    const ctx = document.getElementById('graficaPromedios');
+    const materiasLabels = @Html.Raw(materiasLabels);
+    const materiasPromedios = @Html.Raw(materiasPromedios);
 
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: alumnos,
-            datasets: [{
-                label: 'Promedio por alumno',
-                data: promedios,
-                borderWidth: 1
-            }]
+    const estadoLabels = @Html.Raw(estadoLabels);
+    const estadoCantidad = @Html.Raw(estadoCantidad);
+
+    const cantidadCarreraLabels = @Html.Raw(cantidadCarreraLabels);
+    const cantidadCarreraDatos = @Html.Raw(cantidadCarreraDatos);
+
+    Chart.defaults.color = "#cbd5e1";
+    Chart.defaults.borderColor = "rgba(148, 163, 184, 0.20)";
+
+    const opcionesEscalaNotas = {
+        responsive: true,
+        plugins: {
+            legend: {
+                labels: {
+                    color: "#cbd5e1"
+                }
+            }
         },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 10
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 10,
+                ticks: {
+                    color: "#cbd5e1"
+                },
+                grid: {
+                    color: "rgba(148, 163, 184, 0.15)"
+                }
+            },
+            x: {
+                ticks: {
+                    color: "#cbd5e1"
+                },
+                grid: {
+                    color: "rgba(148, 163, 184, 0.08)"
                 }
             }
         }
-    });
+    };
+
+    const opcionesEscalaCantidad = {
+        responsive: true,
+        plugins: {
+            legend: {
+                labels: {
+                    color: "#cbd5e1"
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: "#cbd5e1",
+                    precision: 0
+                },
+                grid: {
+                    color: "rgba(148, 163, 184, 0.15)"
+                }
+            },
+            x: {
+                ticks: {
+                    color: "#cbd5e1"
+                },
+                grid: {
+                    color: "rgba(148, 163, 184, 0.08)"
+                }
+            }
+        }
+    };
+
+    if (document.getElementById("graficaCarreras")) {
+        new Chart(document.getElementById("graficaCarreras"), {
+            type: "bar",
+            data: {
+                labels: carrerasLabels,
+                datasets: [{
+                    label: "Promedio por carrera",
+                    data: carrerasPromedios,
+                    backgroundColor: "rgba(96, 165, 250, 0.65)",
+                    borderColor: "rgba(96, 165, 250, 1)",
+                    borderWidth: 1,
+                    borderRadius: 8
+                }]
+            },
+            options: opcionesEscalaNotas
+        });
+    }
+
+    if (document.getElementById("graficaEstados")) {
+        new Chart(document.getElementById("graficaEstados"), {
+            type: "doughnut",
+            data: {
+                labels: estadoLabels,
+                datasets: [{
+                    label: "Cantidad",
+                    data: estadoCantidad,
+                    backgroundColor: [
+                        "rgba(16, 185, 129, 0.75)",
+                        "rgba(239, 68, 68, 0.75)"
+                    ],
+                    borderColor: [
+                        "rgba(16, 185, 129, 1)",
+                        "rgba(239, 68, 68, 1)"
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            color: "#cbd5e1"
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    if (document.getElementById("graficaMaterias")) {
+        new Chart(document.getElementById("graficaMaterias"), {
+            type: "bar",
+            data: {
+                labels: materiasLabels,
+                datasets: [{
+                    label: "Promedio por materia",
+                    data: materiasPromedios,
+                    backgroundColor: "rgba(129, 140, 248, 0.65)",
+                    borderColor: "rgba(129, 140, 248, 1)",
+                    borderWidth: 1,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                ...opcionesEscalaNotas,
+                indexAxis: "y",
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 10,
+                        ticks: {
+                            color: "#cbd5e1"
+                        },
+                        grid: {
+                            color: "rgba(148, 163, 184, 0.15)"
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: "#cbd5e1"
+                        },
+                        grid: {
+                            color: "rgba(148, 163, 184, 0.08)"
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    if (document.getElementById("graficaCantidadCarrera")) {
+        new Chart(document.getElementById("graficaCantidadCarrera"), {
+            type: "bar",
+            data: {
+                labels: cantidadCarreraLabels,
+                datasets: [{
+                    label: "Expedientes por carrera",
+                    data: cantidadCarreraDatos,
+                    backgroundColor: "rgba(56, 189, 248, 0.65)",
+                    borderColor: "rgba(56, 189, 248, 1)",
+                    borderWidth: 1,
+                    borderRadius: 8
+                }]
+            },
+            options: opcionesEscalaCantidad
+        });
+    }
 </script>

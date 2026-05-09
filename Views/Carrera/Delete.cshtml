@@ -1,0 +1,43 @@
+﻿@model ColegioSanJose.Models.Carrera
+
+@{
+    ViewData["Title"] = "Eliminar carrera";
+    bool estaEnUso = ViewBag.EstaEnUso != null && ViewBag.EstaEnUso == true;
+}
+
+<h1>Eliminar carrera</h1>
+
+@if (estaEnUso)
+{
+    <div class="alert alert-warning">
+        Esta carrera no se puede eliminar porque está asignada a alumnos o materias.
+    </div>
+}
+else
+{
+    <div class="alert alert-danger">
+        ¿Está seguro que desea eliminar esta carrera?
+    </div>
+}
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <dl class="row">
+            <dt class="col-sm-3">Carrera</dt>
+            <dd class="col-sm-9">@Model.NombreCarrera</dd>
+        </dl>
+
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="CarreraId" />
+
+            @if (!estaEnUso)
+            {
+                <input type="submit" value="Eliminar" class="btn btn-danger" />
+            }
+
+            <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
+        </form>
+    </div>
+</div>

@@ -2,6 +2,9 @@
 
 @{
     ViewData["Title"] = "Agregar expediente";
+
+    var alumnos = ViewBag.Alumnos as List<ColegioSanJose.Models.Alumno>;
+    var materias = ViewBag.Materias as List<ColegioSanJose.Models.Materia>;
 }
 
 <h1>Agregar expediente</h1>
@@ -9,39 +12,123 @@
 <hr />
 
 <div class="row">
-    <div class="col-md-6">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-            <div class="form-group mb-3">
-                <label asp-for="AlumnoId" class="control-label">Alumno</label>
-                <select asp-for="AlumnoId" class="form-control" asp-items="ViewBag.AlumnoId"></select>
-                <span asp-validation-for="AlumnoId" class="text-danger"></span>
-            </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="AlumnoId" class="control-label">Alumno</label>
 
-            <div class="form-group mb-3">
-                <label asp-for="MateriaId" class="control-label">Materia</label>
-                <select asp-for="MateriaId" class="form-control" asp-items="ViewBag.MateriaId"></select>
-                <span asp-validation-for="MateriaId" class="text-danger"></span>
-            </div>
+                        <select asp-for="AlumnoId" id="alumnoSelect" class="form-control">
+                            <option value="">Seleccione un alumno</option>
 
-            <div class="form-group mb-3">
-                <label asp-for="NotaFinal" class="control-label">Nota final</label>
-                <input asp-for="NotaFinal" class="form-control" />
-                <span asp-validation-for="NotaFinal" class="text-danger"></span>
-            </div>
+                            @if (alumnos != null)
+                            {
+                                foreach (var alumno in alumnos)
+                                {
+                                    if (Model != null && Model.AlumnoId == alumno.AlumnoId)
+                                    {
+                                        <option value="@alumno.AlumnoId"
+                                                data-nombre="@alumno.Nombre @alumno.Apellido"
+                                                data-grado="@alumno.Grado"
+                                                selected>
+                                            @alumno.Nombre @alumno.Apellido — @alumno.Grado
+                                        </option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@alumno.AlumnoId"
+                                                data-nombre="@alumno.Nombre @alumno.Apellido"
+                                                data-grado="@alumno.Grado">
+                                            @alumno.Nombre @alumno.Apellido — @alumno.Grado
+                                        </option>
+                                    }
+                                }
+                            }
+                        </select>
 
-            <div class="form-group mb-3">
-                <label asp-for="Observaciones" class="control-label">Observaciones</label>
-                <textarea asp-for="Observaciones" class="form-control" rows="3"></textarea>
-                <span asp-validation-for="Observaciones" class="text-danger"></span>
-            </div>
+                        <span asp-validation-for="AlumnoId" class="text-danger"></span>
+                    </div>
 
-            <div class="form-group">
-                <input type="submit" value="Guardar" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
+                    <div class="form-group mb-3">
+                        <label asp-for="MateriaId" class="control-label">Materia</label>
+
+                        <select asp-for="MateriaId" id="materiaSelect" class="form-control">
+                            <option value="">Seleccione una materia</option>
+
+                            @if (materias != null)
+                            {
+                                foreach (var materia in materias)
+                                {
+                                    if (Model != null && Model.MateriaId == materia.MateriaId)
+                                    {
+                                        <option value="@materia.MateriaId"
+                                                data-grado="@materia.Grado"
+                                                data-materia="@materia.NombreMateria"
+                                                data-docente="@materia.Docente"
+                                                selected>
+                                            @materia.NombreMateria — @materia.Docente — @materia.Grado
+                                        </option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@materia.MateriaId"
+                                                data-grado="@materia.Grado"
+                                                data-materia="@materia.NombreMateria"
+                                                data-docente="@materia.Docente">
+                                            @materia.NombreMateria — @materia.Docente — @materia.Grado
+                                        </option>
+                                    }
+                                }
+                            }
+                        </select>
+
+                        <span asp-validation-for="MateriaId" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="NotaFinal" class="control-label">Nota final</label>
+                        <input asp-for="NotaFinal" id="notaInput" class="form-control" placeholder="Ejemplo: 8.50" />
+                        <span asp-validation-for="NotaFinal" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Observaciones" class="control-label">Observaciones</label>
+                        <textarea asp-for="Observaciones" class="form-control" rows="4" placeholder="Ejemplo: Buen desempeño académico"></textarea>
+                        <span asp-validation-for="Observaciones" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="submit" value="Guardar" class="btn btn-primary" />
+                        <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4>Resumen del expediente</h4>
+                <p class="text-muted">Selecciona un alumno y una materia para validar la información.</p>
+
+                <hr />
+
+                <p><strong>Alumno:</strong> <span id="resumenAlumno">No seleccionado</span></p>
+                <p><strong>Grado:</strong> <span id="resumenGrado">No seleccionado</span></p>
+                <p><strong>Materia:</strong> <span id="resumenMateria">No seleccionada</span></p>
+                <p><strong>Profesor:</strong> <span id="resumenDocente">No seleccionado</span></p>
+                <p><strong>Nota:</strong> <span id="resumenNota">Sin nota</span></p>
+                <p><strong>Estado:</strong> <span id="resumenEstado" class="badge bg-secondary">Pendiente</span></p>
+
+                <div class="alert alert-warning mt-3">
+                    Solo se mostrarán las materias que corresponden al grado del alumno seleccionado.
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -49,4 +136,89 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        const alumnoSelect = document.getElementById("alumnoSelect");
+        const materiaSelect = document.getElementById("materiaSelect");
+        const notaInput = document.getElementById("notaInput");
+
+        const resumenAlumno = document.getElementById("resumenAlumno");
+        const resumenGrado = document.getElementById("resumenGrado");
+        const resumenMateria = document.getElementById("resumenMateria");
+        const resumenDocente = document.getElementById("resumenDocente");
+        const resumenNota = document.getElementById("resumenNota");
+        const resumenEstado = document.getElementById("resumenEstado");
+
+        function actualizarMateriasPorGrado() {
+            const alumnoOption = alumnoSelect.options[alumnoSelect.selectedIndex];
+            const gradoAlumno = alumnoOption ? alumnoOption.getAttribute("data-grado") : "";
+
+            for (let i = 0; i < materiaSelect.options.length; i++) {
+                const option = materiaSelect.options[i];
+
+                if (option.value === "") {
+                    option.hidden = false;
+                    continue;
+                }
+
+                const gradoMateria = option.getAttribute("data-grado");
+                option.hidden = gradoMateria !== gradoAlumno;
+            }
+
+            const materiaSeleccionada = materiaSelect.options[materiaSelect.selectedIndex];
+
+            if (materiaSeleccionada && materiaSeleccionada.hidden) {
+                materiaSelect.value = "";
+            }
+        }
+
+        function actualizarResumen() {
+            const alumnoOption = alumnoSelect.options[alumnoSelect.selectedIndex];
+            const materiaOption = materiaSelect.options[materiaSelect.selectedIndex];
+            const nota = parseFloat(notaInput.value);
+
+            if (alumnoOption && alumnoOption.value !== "") {
+                resumenAlumno.textContent = alumnoOption.getAttribute("data-nombre");
+                resumenGrado.textContent = alumnoOption.getAttribute("data-grado");
+            } else {
+                resumenAlumno.textContent = "No seleccionado";
+                resumenGrado.textContent = "No seleccionado";
+            }
+
+            if (materiaOption && materiaOption.value !== "") {
+                resumenMateria.textContent = materiaOption.getAttribute("data-materia");
+                resumenDocente.textContent = materiaOption.getAttribute("data-docente");
+            } else {
+                resumenMateria.textContent = "No seleccionada";
+                resumenDocente.textContent = "No seleccionado";
+            }
+
+            if (!isNaN(nota)) {
+                resumenNota.textContent = nota.toFixed(2);
+
+                if (nota >= 6) {
+                    resumenEstado.textContent = "Aprobado";
+                    resumenEstado.className = "badge bg-success";
+                } else {
+                    resumenEstado.textContent = "Reprobado";
+                    resumenEstado.className = "badge bg-danger";
+                }
+            } else {
+                resumenNota.textContent = "Sin nota";
+                resumenEstado.textContent = "Pendiente";
+                resumenEstado.className = "badge bg-secondary";
+            }
+        }
+
+        alumnoSelect.addEventListener("change", function () {
+            actualizarMateriasPorGrado();
+            actualizarResumen();
+        });
+
+        materiaSelect.addEventListener("change", actualizarResumen);
+        notaInput.addEventListener("input", actualizarResumen);
+
+        actualizarMateriasPorGrado();
+        actualizarResumen();
+    </script>
 }

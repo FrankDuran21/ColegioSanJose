@@ -2,34 +2,140 @@
 
 @{
     ViewData["Title"] = "Listado de materias";
+
+    var filtro = ViewData["FiltroActual"] as string;
+    var docenteActual = ViewData["DocenteActual"] as string;
+    var ordenActual = ViewData["OrdenActual"] as string;
+    var docentes = ViewBag.Docentes as List<string>;
 }
 
 <h1>Listado de materias</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Agregar materia</a>
-</p>
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form asp-action="Index" method="get">
+            <div class="row g-3 align-items-end">
 
-<table class="table table-striped table-bordered">
-    <thead class="table-dark">
-        <tr>
-            <th>Materia</th>
-            <th>Docente</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.NombreMateria</td>
-                <td>@item.Docente</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.MateriaId" class="btn btn-warning btn-sm">Editar</a>
-                    <a asp-action="Details" asp-route-id="@item.MateriaId" class="btn btn-info btn-sm">Detalles</a>
-                    <a asp-action="Delete" asp-route-id="@item.MateriaId" class="btn btn-danger btn-sm">Eliminar</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                <div class="col-md-5">
+                    <label class="form-label">Buscar por materia o profesor</label>
+                    <input type="text"
+                           name="buscar"
+                           value="@filtro"
+                           class="form-control"
+                           placeholder="Ejemplo: Matemática, Alba Álvarez, Programación..." />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Filtrar por profesor</label>
+                    <select name="docente" class="form-control">
+                        <option value="">Todos los profesores</option>
+
+                        @if (docentes != null)
+                        {
+                            foreach (var docente in docentes)
+                            {
+                                if (docente == docenteActual)
+                                {
+                                    <option value="@docente" selected>@docente</option>
+                                }
+                                else
+                                {
+                                    <option value="@docente">@docente</option>
+                                }
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Ordenar</label>
+                    <select name="orden" class="form-control">
+
+                        @if (ordenActual == "materia_az" || string.IsNullOrEmpty(ordenActual))
+                        {
+                            <option value="materia_az" selected>Materia A - Z</option>
+                        }
+                        else
+                        {
+                            <option value="materia_az">Materia A - Z</option>
+                        }
+
+                        @if (ordenActual == "materia_za")
+                        {
+                            <option value="materia_za" selected>Materia Z - A</option>
+                        }
+                        else
+                        {
+                            <option value="materia_za">Materia Z - A</option>
+                        }
+
+                        @if (ordenActual == "docente_az")
+                        {
+                            <option value="docente_az" selected>Profesor A - Z</option>
+                        }
+                        else
+                        {
+                            <option value="docente_az">Profesor A - Z</option>
+                        }
+
+                        @if (ordenActual == "docente_za")
+                        {
+                            <option value="docente_za" selected>Profesor Z - A</option>
+                        }
+                        else
+                        {
+                            <option value="docente_za">Profesor Z - A</option>
+                        }
+
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100 mb-2">Buscar</button>
+                    <a asp-action="Index" class="btn btn-secondary w-100">Limpiar</a>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="mb-3">
+    <a asp-action="Create" class="btn btn-primary">Agregar materia</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-warning">
+        No se encontraron materias con los filtros seleccionados.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table-dark-custom">
+            <thead>
+                <tr>
+                    <th>Materia</th>
+                    <th>Profesor</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.NombreMateria</td>
+                        <td>@item.Docente</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.MateriaId" class="btn btn-warning btn-sm">Editar</a>
+                            <a asp-action="Details" asp-route-id="@item.MateriaId" class="btn btn-info btn-sm">Detalles</a>
+                            <a asp-action="Delete" asp-route-id="@item.MateriaId" class="btn btn-danger btn-sm">Eliminar</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
