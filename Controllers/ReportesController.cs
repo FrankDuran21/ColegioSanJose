@@ -38,5 +38,30 @@ namespace ColegioSanJose.Controllers
 
             return View(promedios);
         }
+
+        public async Task<IActionResult> Graficas()
+        {
+            var promedios = await _context.Expedientes
+                .Include(e => e.Alumno)
+                .GroupBy(e => new
+                {
+                    e.AlumnoId,
+                    e.Alumno!.Nombre,
+                    e.Alumno.Apellido
+                })
+                .Select(g => new
+                {
+                    Alumno = g.Key.Nombre + " " + g.Key.Apellido,
+                    Promedio = g.Average(e => e.NotaFinal)
+                })
+                .OrderBy(x => x.Alumno)
+                .ToListAsync();
+
+            ViewBag.Alumnos = promedios.Select(x => x.Alumno).ToList();
+            ViewBag.Promedios = promedios.Select(x => x.Promedio).ToList();
+
+            return View();
+        }
     }
+
 }

@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Gráficas estadísticas";
+    var alumnos = System.Text.Json.JsonSerializer.Serialize(ViewBag.Alumnos);
+    var promedios = System.Text.Json.JsonSerializer.Serialize(ViewBag.Promedios);
+}
+
+<h1>Gráficas estadísticas</h1>
+
+<p>Promedio de notas por alumno.</p>
+
+<div class="card shadow-sm p-4">
+    <canvas id="graficaPromedios"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const alumnos = @Html.Raw(alumnos);
+    const promedios = @Html.Raw(promedios);
+
+    const ctx = document.getElementById('graficaPromedios');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: alumnos,
+            datasets: [{
+                label: 'Promedio por alumno',
+                data: promedios,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 10
+                }
+            }
+        }
+    });
+</script>
