@@ -1,53 +1,43 @@
 ﻿@model IEnumerable<ColegioSanJose.Models.Expediente>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Listado de expedientes";
 }
 
-<h1>Index</h1>
+<h1>Listado de expedientes</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Agregar expediente</a>
 </p>
-<table class="table">
-    <thead>
+
+<table class="table table-striped table-bordered">
+    <thead class="table-dark">
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Alumno)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Materia)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NotaFinal)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Observaciones)
-            </th>
-            <th></th>
+            <th>Alumno</th>
+            <th>Materia</th>
+            <th>Nota final</th>
+            <th>Observaciones</th>
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Alumno.Apellido)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Materia.NombreMateria)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NotaFinal)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Observaciones)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ExpedienteId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ExpedienteId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ExpedienteId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @(item.Alumno != null ? item.Alumno.Nombre + " " + item.Alumno.Apellido : "")
+                </td>
+                <td>
+                    @(item.Materia != null ? item.Materia.NombreMateria : "")
+                </td>
+                <td>@item.NotaFinal.ToString("0.00")</td>
+                <td>@item.Observaciones</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.ExpedienteId" class="btn btn-warning btn-sm">Editar</a>
+                    <a asp-action="Details" asp-route-id="@item.ExpedienteId" class="btn btn-info btn-sm">Detalles</a>
+                    <a asp-action="Delete" asp-route-id="@item.ExpedienteId" class="btn btn-danger btn-sm">Eliminar</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

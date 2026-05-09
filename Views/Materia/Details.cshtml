@@ -1,30 +1,22 @@
 ﻿@model ColegioSanJose.Models.Materia
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalles de la materia";
 }
 
-<h1>Details</h1>
+<h1>Detalles de la materia</h1>
 
-<div>
-    <h4>Materia</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NombreMateria)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NombreMateria)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Docente)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Docente)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.MateriaId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<div class="card">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Nombre de la materia</dt>
+            <dd class="col-sm-9">@Model.NombreMateria</dd>
+
+            <dt class="col-sm-3">Docente</dt>
+            <dd class="col-sm-9">@Model.Docente</dd>
+        </dl>
+
+        <a asp-action="Edit" asp-route-id="@Model.MateriaId" class="btn btn-warning">Editar</a>
+        <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
+    </div>
 </div>
