@@ -50,7 +50,7 @@ namespace ColegioSanJose.Controllers
         public IActionResult Create()
         {
             ViewData["AlumnoId"] = new SelectList(_context.Alumnos, "AlumnoId", "Apellido");
-            ViewData["MateriaId"] = new SelectList(_context.Materias, "MateriaId", "Docente");
+            ViewData["MateriaId"] = new SelectList(_context.Materias, "MateriaId", "NombreMateria");
             return View();
         }
 
